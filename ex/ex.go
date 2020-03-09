@@ -2,32 +2,46 @@ package main
 
 import "fmt"
 
-type stringRepresentable interface {
-	raw() string
-}
-
 type person struct {
-	first string
-	last  string
-	age   int8
+	name string
 }
 
-func (p person) raw() (str string) {
-	str = fmt.Sprintf("name: %v %v, age: %v", p.first, p.last, p.age)
-	return str
+type mongodb map[int]person
+
+type accessor interface {
+	save(int, person)
+	retrieve(int) person
+}
+
+func (m *mongodb) save(i int, p person) {
+	v := *m
+	v[i] = p
+}
+
+func (m *mongodb) retrieve(i int) person {
+	v := *m
+	return v[i]
 }
 
 func main() {
-
 	p1 := person{
-		first: "Daniel",
-		last:  "Sanchez R",
-		age:   24,
+		name: "Daniel",
 	}
 
-	var rr stringRepresentable
-	rr = p1
+	acc := mongodb{}
 
-	fmt.Println(rr.raw())
+	put(&acc, 1, p1)
 
+	lastPerson := get(&acc, 1)
+
+	fmt.Println(lastPerson.name)
+
+}
+
+func put(acc accessor, id int, p person) {
+	acc.save(id, p)
+}
+
+func get(acc accessor, id int) person {
+	return acc.retrieve(id)
 }
