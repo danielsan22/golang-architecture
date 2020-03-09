@@ -1,47 +1,36 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+	"log"
+	"os"
+)
 
-type person struct {
-	name string
-}
-
-type mongodb map[int]person
-
-type accessor interface {
-	save(int, person)
-	retrieve(int) person
-}
-
-func (m *mongodb) save(i int, p person) {
-	v := *m
-	v[i] = p
-}
-
-func (m *mongodb) retrieve(i int) person {
-	v := *m
-	return v[i]
-}
+var fileName string = "file-01.txt"
+var newFile string = "file-02.txt"
 
 func main() {
-	p1 := person{
-		name: "Daniel",
+
+	file, err := os.Open(fileName)
+
+	if err != nil {
+		log.Fatal(err)
 	}
+	defer file.Close()
 
-	acc := mongodb{}
+	newFile, err := os.Create(newFile)
 
-	put(&acc, 1, p1)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer newFile.Close()
 
-	lastPerson := get(&acc, 1)
+	bytes, err := io.Copy(newFile, file)
 
-	fmt.Println(lastPerson.name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("coppied %v bytes\n", bytes)
 
-}
-
-func put(acc accessor, id int, p person) {
-	acc.save(id, p)
-}
-
-func get(acc accessor, id int) person {
-	return acc.retrieve(id)
 }
