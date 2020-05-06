@@ -1,36 +1,25 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"io"
-	"log"
-	"os"
-)
 
-var fileName string = "file-01.txt"
-var newFile string = "file-02.txt"
+	"github.com/danielsan22/golang-architecture/ex/req"
+)
 
 func main() {
 
-	file, err := os.Open(fileName)
+	ctx := context.Background()
+	ctx = req.WithUserId(ctx, 1)
+	ctx = req.WithUserName(ctx, "Daniel")
 
-	if err != nil {
-		log.Fatal(err)
+	name := req.UserName(ctx)
+	fmt.Println(*name)
+
+	if id := req.UserId(ctx); id != nil {
+		fmt.Println(*id)
+	} else {
+		fmt.Println("no value")
 	}
-	defer file.Close()
-
-	newFile, err := os.Create(newFile)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer newFile.Close()
-
-	bytes, err := io.Copy(newFile, file)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("coppied %v bytes\n", bytes)
 
 }
